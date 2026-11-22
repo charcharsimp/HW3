@@ -1,0 +1,90 @@
+CustomerID,Orders,LastOrder,IdleDays,TypicalGapDays,CompanyName,Country,ThresholdDays,Lapsed,LifetimeRevenue,TrailingYearRevenue
+MEREP,13,1997-10-30,188,17.5,Mère Paillarde,Canada,90.0,True,28872.190000000002,12911.85
+SEVES,9,1998-02-04,91,29.0,Seven Seas Imports,UK,90.0,True,16215.324999999999,7170.135
+VICTE,10,1998-01-23,103,19.0,Victuailles en stock,France,90.0,True,9182.43,5828.05
+HUNGC,5,1997-09-08,240,37.5,Hungry Coyote Import Store,USA,112.5,True,3063.2,2180.8
+GROSR,2,1997-12-18,139,,GROSELLA-Restaurante,Venezuela,90.0,True,1488.7,387.5
+VINET,4,1997-11-12,175,27.0,Vins et alcools Chevalier,France,90.0,True,1040.0,379.8
+LAZYK,2,1997-05-22,349,,Lazy K Kountry Store,USA,90.0,True,357.0,210.0
+CENTC,1,1996-07-18,657,,Centro comercial Moctezuma,Mexico,90.0,True,100.8,0.0
+QUICK,28,1998-04-14,22,18.0,QUICK-Stop,Germany,90.0,False,110277.30500000001,81238.465
+ERNSH,30,1998-05-05,1,14.0,Ernst Handel,Austria,90.0,False,104874.9785,70423.7485
+SAVEA,31,1998-05-01,5,14.0,Save-a-lot Markets,USA,90.0,False,104361.95,82373.51
+RATTC,18,1998-05-06,0,28.0,Rattlesnake Canyon Grocery,USA,90.0,False,51097.8005,26257.820499999998
+HUNGO,19,1998-04-30,6,26.0,Hungry Owl All-Night Grocers,Ireland,90.0,False,49979.905,34985.6
+HANAR,14,1998-04-27,9,18.0,Hanari Carnes,Brazil,90.0,False,32841.37,29843.97
+KOENE,14,1998-04-16,20,35.0,Königlich Essen,Germany,105.0,False,30908.384000000002,25971.984
+FOLKO,19,1998-04-27,9,25.0,Folk och fä HB,Sweden,90.0,False,29567.5625,26461.5175
+WHITC,14,1998-05-01,5,25.0,White Clover Markets,USA,90.0,False,27363.605,21411.43
+FRANK,15,1998-04-09,27,36.0,Frankenversand,Germany,108.0,False,26656.5595,15396.5195
+QUEEN,13,1998-05-04,2,36.5,Queen Cozinha,Brazil,109.5,False,25717.4975,13786.1175
+BERGS,18,1998-03-04,63,26.0,Berglunds snabbköp,Sweden,90.0,False,24927.5775,16203.9275
+SUPRD,12,1998-04-21,15,22.0,Suprêmes délices,Belgium,90.0,False,24088.78,11672.6
+PICCO,10,1998-04-27,9,60.0,Piccolo und mehr,Austria,180.0,False,23128.86,12005.380000000001
+HILAA,18,1998-04-28,8,24.0,HILARIÓN-Abastos,Venezuela,90.0,False,22768.764,14335.264
+BONAP,17,1998-05-06,0,24.5,Bon app',France,90.0,False,21963.2525,12699.7725
+BOTTM,14,1998-04-24,12,12.0,Bottom-Dollar Markets,Canada,90.0,False,20801.6,14456.55
+RICSU,10,1998-05-06,0,73.0,Richter Supermarkt,Switzerland,219.0,False,19343.779000000002,14755.679000000002
+LEHMS,15,1998-05-05,1,23.0,Lehmanns Marktstand,Germany,90.0,False,19261.41,12457.195
+BLONP,11,1998-01-12,114,42.5,Blondel père et fils,France,127.5,False,18534.08,4715.16
+GREAL,11,1998-04-30,6,28.0,Great Lakes Food Market,USA,90.0,False,18507.45,18115.25
+SIMOB,7,1998-05-06,0,92.5,Simons bistro,Denmark,277.5,False,16817.0975,5276.0975
+LINOD,12,1998-04-21,15,27.0,LINO-Delicateses,Venezuela,90.0,False,16476.565,14492.565
+LILAS,14,1998-05-05,1,39.0,LILA-Supermercado,Venezuela,117.0,False,16076.6,7731.82
+VAFFE,11,1998-04-02,34,40.0,Vaffeljernet,Denmark,120.0,False,15843.925,10726.125
+WARTH,15,1998-04-15,21,28.5,Wartian Herkku,Finland,90.0,False,15648.7025,7249.7425
+OLDWO,10,1998-04-20,16,56.0,Old World Delicatessen,USA,168.0,False,15271.1125,7335.6625
+EASTC,8,1998-04-28,8,36.0,Eastern Connection,UK,108.0,False,14761.035,10748.035
+AROUT,13,1998-04-10,26,29.0,Around the Horn,UK,90.0,False,13390.65,11603.95
+RICAR,11,1998-04-29,7,45.5,Ricardo Adocicados,Brazil,136.5,False,12450.8,8895.9
+CHOPS,8,1998-04-22,14,121.0,Chop-suey Chinese,Switzerland,363.0,False,12348.88,8360.46
+FOLIG,5,1997-12-22,135,90.5,Folies gourmandes,France,271.5,False,11666.9,9288.5
+GODOS,10,1998-04-21,15,15.0,Godos Cocina Típica,Spain,90.0,False,11446.36,10328.560000000001
+SPLIR,9,1998-03-25,42,43.5,Split Rail Beer & Ale,USA,130.5,False,11441.63,3107.0
+OTTIK,9,1998-04-14,22,57.0,Ottilies Käseladen,Germany,171.0,False,10991.55,9557.55
+TORTU,10,1998-05-04,2,59.0,Tortuga Restaurante,Mexico,177.0,False,10812.15,3247.8
+MAISD,7,1998-04-07,29,56.5,Maison Dewey,Belgium,169.5,False,9736.075,9736.075
+WANDK,10,1998-04-23,13,14.0,Die Wandernde Kuh,Germany,90.0,False,9588.425,3806.625
+LAMAI,14,1998-04-27,9,28.0,La maison d'Asie,France,90.0,False,9328.2,4237.72
+TRADH,7,1998-01-19,107,81.5,Tradição Hipermercados,Brazil,244.5,False,8714.064,5364.664
+GOURL,9,1998-04-24,12,32.5,Gourmet Lanchonetes,Brazil,97.5,False,8414.135,7394.135
+MAGAA,10,1998-03-16,51,62.0,Magazzini Alimentari Riuniti,Italy,186.0,False,7176.215,4449.925
+REGGC,12,1998-04-30,6,55.0,Reggiani Caseifici,Italy,165.0,False,7048.24,6258.7
+ANTON,7,1998-01-28,98,66.0,Antonio Moreno Taquería,Mexico,198.0,False,7023.9775,5871.715
+QUEDE,9,1998-03-31,36,59.5,Que Delícia,Brazil,178.5,False,6664.81,3661.74
+PRINI,6,1998-04-08,28,65.0,Princesa Isabel Vinhos,Portugal,195.0,False,6455.9400000000005,4044.9
+FURIB,8,1998-03-19,48,54.0,Furia Bacalhau e Frutos do Mar,Portugal,162.0,False,6427.4225,3254.3375
+ISLAT,10,1998-03-06,61,44.0,Island Trading,UK,132.0,False,6146.3,5014.7
+BSBEV,10,1998-04-14,22,32.0,B's Beverages,UK,96.0,False,6089.9,3896.3
+WELLI,9,1998-03-09,58,52.5,Wellington Importadora,Brazil,157.5,False,6068.2,3842.56
+SANTG,6,1998-04-10,26,113.0,Santé Gourmet,Norway,339.0,False,5735.150000000001,4476.75
+MORGK,5,1998-03-12,55,98.5,Morgenstern Gesundkost,Germany,295.5,False,5042.2,3841.4
+ALFKI,6,1998-04-09,27,39.0,Alfreds Futterkiste,Germany,117.0,False,4273.0,4273.0
+LONEP,8,1998-04-13,23,60.0,Lonesome Pine Restaurant,USA,180.0,False,4258.6,3546.6
+PERIC,6,1998-05-05,1,41.0,Pericles Comidas clásicas,Mexico,123.0,False,4242.2,1496.0
+BOLID,3,1998-03-24,43,265.0,Bólido Comidas preparadas,Spain,795.0,False,4232.85,3250.8500000000004
+FAMIA,7,1997-10-31,187,63.5,Familia Arquibaldo,Brazil,190.5,False,4107.55,2377.0
+COMMI,5,1998-04-22,14,110.5,Comércio Mineiro,Brazil,331.5,False,3810.75,513.75
+DRACD,6,1998-05-04,2,27.0,Drachenblut Delikatessen,Germany,90.0,False,3763.21,3229.61
+WILMK,8,1998-04-07,29,40.0,Wilman Kala,Finland,120.0,False,3601.35,3161.35
+WOLZA,7,1998-04-23,13,40.0,Wolski  Zajazd,Poland,120.0,False,3531.95,3072.95
+OCEAN,5,1998-03-30,37,72.5,Océano Atlántico Ltda.,Argentina,217.5,False,3460.2,3141.0
+THEBI,4,1998-04-01,35,92.0,The Big Cheese,USA,276.0,False,3361.0,3025.0
+BLAUS,7,1998-04-29,7,46.0,Blauer See Delikatessen,Germany,138.0,False,3239.8,2954.0
+FRANR,3,1998-03-24,43,94.0,France restauration,France,282.0,False,3172.1600000000003,3172.1600000000003
+LETSS,4,1998-02-12,83,94.0,Let's Stop N Shop,USA,282.0,False,3076.4725,3076.4725
+TOMSP,5,1998-03-23,44,79.5,Toms Spezialitäten,Germany,238.5,False,2914.74,2214.5
+RANCH,5,1998-04-13,23,63.0,Rancho grande,Argentina,189.0,False,2844.1,2400.7
+SPECD,4,1998-04-22,14,33.0,Spécialités du monde,France,99.0,False,2423.35,2423.35
+LACOR,4,1998-03-24,43,19.0,La corne d'abondance,France,90.0,False,1992.05,1992.05
+THECR,3,1998-04-06,30,121.0,The Cracker Box,USA,363.0,False,1947.24,1947.24
+CACTU,6,1998-04-28,8,35.0,Cactus Comidas para llevar,Argentina,105.0,False,1814.8,1589.3
+CONSH,3,1998-01-23,103,176.5,Consolidated Holdings,UK,529.5,False,1719.1,931.5
+DUMON,4,1998-02-16,79,143.0,Du monde entier,France,429.0,False,1615.8999999999999,1347.1
+TRAIH,3,1998-01-08,118,101.5,Trail's Head Gourmet Provisioners,USA,304.5,False,1571.2,1571.2
+FRANS,6,1998-04-30,6,36.0,Franchi S.p.A.,Italy,108.0,False,1545.7,1495.9
+ROMEY,5,1998-04-09,27,35.0,Romero y tomillo,Spain,105.0,False,1467.29,726.89
+ANATR,4,1998-03-04,63,112.0,Ana Trujillo Emparedados y helados,Mexico,336.0,False,1402.95,1314.15
+GALED,5,1998-03-05,62,98.5,Galería del gastrónomo,Spain,295.5,False,836.7,362.5
+NORTS,3,1998-04-29,7,185.0,North/South,UK,555.0,False,649.0,297.0
+LAUGB,3,1998-01-01,125,136.5,Laughing Bacchus Wine Cellars,Canada,409.5,False,522.5,244.5
