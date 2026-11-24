@@ -388,6 +388,35 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(html.count("<img "), 4)
         self.assertIn("https://github.com/example/repo", html)
 
+    def test_calculation_links_point_at_real_files(self):
+        html = self.site.read_text(encoding="utf-8")
+        self.assertEqual(html.count("<h3>How we got this</h3>"), 4)
+        self.assertEqual(html.count("Show the calculation"), 4)
+        downloads = set(re.findall(r"href='downloads/([^']+)'", html))
+        self.assertGreaterEqual(len(downloads), 7)
+        for name in downloads:
+            target = self.site.parent / "downloads" / name
+            self.assertTrue(target.exists(), name)
+        repo = "https://github.com/example/repo/blob/main/"
+        paths = re.findall(
+            r"href='" + re.escape(repo) + r"([^']+)'", html
+        )
+        self.assertGreaterEqual(len(paths), 8)
+        for path in paths:
+            self.assertTrue((WORKBOOK.parents[1] / path).exists(), path)
+        ids = set(re.findall(r"id=[\"']([^\"']+)[\"']", html))
+        for anchor in re.findall(r"href=[\"']#([^\"']+)[\"']", html):
+            self.assertIn(anchor, ids)
+
+    def test_code_links_fill_in_from_page_address(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            page = Path(tmp) / "docs" / "index.html"
+            run_all.run(WORKBOOK, Path(tmp) / "o", page)
+            html = page.read_text(encoding="utf-8")
+        self.assertIn("data-repo-path='northwind_analysis/markets.py'", html)
+        self.assertIn("a[data-repo-path]", html)
+        self.assertNotIn("github.com/example", html)
+
     def test_every_image_has_alt_text(self):
         html = self.site.read_text(encoding="utf-8")
         for tag in re.findall(r"<img [^>]*>", html):

@@ -56,7 +56,7 @@ Module docstring: *Run the full Northwind analysis and rebuild every output.*
     """
 ```
 
-#### `main` — [run_all.py:177](run_all.py:177)
+#### `main` — [run_all.py:178](run_all.py:178)
 
 ```python
 """Run the analysis from the command line.
@@ -592,7 +592,7 @@ Module docstring: *Shared matplotlib style and formatting helpers.*
 
 Module docstring: *Build the single-file webpage from the analysis results.*
 
-#### `_usd` — [northwind_analysis/site.py:203](northwind_analysis/site.py:203)
+#### `_usd` — [northwind_analysis/site.py:255](northwind_analysis/site.py:255)
 
 ```python
 """Format dollars with thousands separators.
@@ -605,7 +605,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_usdk` — [northwind_analysis/site.py:215](northwind_analysis/site.py:215)
+#### `_usdk` — [northwind_analysis/site.py:267](northwind_analysis/site.py:267)
 
 ```python
 """Format dollars in thousands.
@@ -618,7 +618,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_pct` — [northwind_analysis/site.py:227](northwind_analysis/site.py:227)
+#### `_pct` — [northwind_analysis/site.py:279](northwind_analysis/site.py:279)
 
 ```python
 """Format a fraction as a percentage.
@@ -632,7 +632,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_date` — [northwind_analysis/site.py:240](northwind_analysis/site.py:240)
+#### `_date` — [northwind_analysis/site.py:292](northwind_analysis/site.py:292)
 
 ```python
 """Format a date without a leading zero on the day.
@@ -645,7 +645,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_listing` — [northwind_analysis/site.py:253](northwind_analysis/site.py:253)
+#### `_listing` — [northwind_analysis/site.py:305](northwind_analysis/site.py:305)
 
 ```python
 """Join names into a readable list.
@@ -658,7 +658,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_esc` — [northwind_analysis/site.py:268](northwind_analysis/site.py:268)
+#### `_esc` — [northwind_analysis/site.py:320](northwind_analysis/site.py:320)
 
 ```python
 """Escape text for safe use inside HTML.
@@ -671,7 +671,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_table` — [northwind_analysis/site.py:280](northwind_analysis/site.py:280)
+#### `_table` — [northwind_analysis/site.py:332](northwind_analysis/site.py:332)
 
 ```python
 """Render a table inside a horizontally scrollable box.
@@ -687,7 +687,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_figure` — [northwind_analysis/site.py:305](northwind_analysis/site.py:305)
+#### `_figure` — [northwind_analysis/site.py:357](northwind_analysis/site.py:357)
 
 ```python
 """Embed a figure PNG as a base64 image with a caption.
@@ -703,7 +703,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_row` — [northwind_analysis/site.py:325](northwind_analysis/site.py:325)
+#### `_row` — [northwind_analysis/site.py:377](northwind_analysis/site.py:377)
 
 ```python
 """Render one labelled block of a question section.
@@ -718,7 +718,95 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_question_one` — [northwind_analysis/site.py:342](northwind_analysis/site.py:342)
+#### `_code_link` — [northwind_analysis/site.py:394](northwind_analysis/site.py:394)
+
+```python
+"""Link to a file in the GitHub repository.
+
+    Args:
+        path (str): File path inside the repository.
+        repo_url (str): Public repository URL; when empty the link is
+            filled in by the page script from the page address.
+        label (str | None): Link text; defaults to ``path``.
+
+    Returns:
+        str: HTML anchor carrying a ``data-repo-path`` attribute.
+    """
+```
+
+#### `_data_link` — [northwind_analysis/site.py:417](northwind_analysis/site.py:417)
+
+```python
+"""Link to a downloadable results file next to the page.
+
+    Args:
+        name (str): File name inside the ``downloads`` folder.
+
+    Returns:
+        str: HTML anchor to ``downloads/<name>``.
+    """
+```
+
+#### `_work` — [northwind_analysis/site.py:429](northwind_analysis/site.py:429)
+
+```python
+"""Render a collapsible step-by-step calculation.
+
+    Args:
+        steps (list[str]): HTML for each numbered step.
+        data_files (list[str]): Names in the ``downloads`` folder.
+        code_files (list[str]): Repository paths of the code used.
+        repo_url (str): Public repository URL for the code links.
+
+    Returns:
+        str: HTML for the collapsible block.
+    """
+```
+
+#### `_plain` — [northwind_analysis/site.py:452](northwind_analysis/site.py:452)
+
+```python
+"""Render the one-sentence answer shown under a question.
+
+    Args:
+        text (str): HTML of the short answer.
+
+    Returns:
+        str: HTML callout.
+    """
+```
+
+#### `_bullets` — [northwind_analysis/site.py:464](northwind_analysis/site.py:464)
+
+```python
+"""Render a compact bulleted list.
+
+    Args:
+        items (list[str]): HTML for each bullet.
+
+    Returns:
+        str: HTML unordered list.
+    """
+```
+
+#### `copy_downloads` — [northwind_analysis/site.py:477](northwind_analysis/site.py:477)
+
+```python
+"""Copy the results files next to the page so it can link to them.
+
+    Args:
+        out_dir (pathlib.Path): Folder holding ``results.json`` and the
+            ``tables`` folder written by the analysis.
+        site_path (pathlib.Path): Path of the HTML page; files go in a
+            ``downloads`` folder beside it.
+
+    Returns:
+        None. Creates ``downloads/`` with the CSV tables and
+        ``results.json``.
+    """
+```
+
+#### `_question_one` — [northwind_analysis/site.py:497](northwind_analysis/site.py:497)
 
 ```python
 """Write the section on market growth.
@@ -727,13 +815,14 @@ Module docstring: *Build the single-file webpage from the analysis results.*
         results (dict[str, Any]): All reported numbers.
         tables (dict[str, pandas.DataFrame]): Supporting tables.
         figures (pathlib.Path): Folder containing the figure PNGs.
+        repo_url (str): Public repository URL for code links.
 
     Returns:
         str: HTML for question 1.
     """
 ```
 
-#### `_question_two` — [northwind_analysis/site.py:462](northwind_analysis/site.py:462)
+#### `_question_two` — [northwind_analysis/site.py:673](northwind_analysis/site.py:673)
 
 ```python
 """Write the section on customer concentration and lapses.
@@ -742,13 +831,14 @@ Module docstring: *Build the single-file webpage from the analysis results.*
         results (dict[str, Any]): All reported numbers.
         tables (dict[str, pandas.DataFrame]): Supporting tables.
         figures (pathlib.Path): Folder containing the figure PNGs.
+        repo_url (str): Public repository URL for code links.
 
     Returns:
         str: HTML for question 2.
     """
 ```
 
-#### `_question_three` — [northwind_analysis/site.py:612](northwind_analysis/site.py:612)
+#### `_question_three` — [northwind_analysis/site.py:888](northwind_analysis/site.py:888)
 
 ```python
 """Write the section on discounting.
@@ -757,13 +847,14 @@ Module docstring: *Build the single-file webpage from the analysis results.*
         results (dict[str, Any]): All reported numbers.
         tables (dict[str, pandas.DataFrame]): Supporting tables.
         figures (pathlib.Path): Folder containing the figure PNGs.
+        repo_url (str): Public repository URL for code links.
 
     Returns:
         str: HTML for question 3.
     """
 ```
 
-#### `_question_four` — [northwind_analysis/site.py:770](northwind_analysis/site.py:770)
+#### `_question_four` — [northwind_analysis/site.py:1107](northwind_analysis/site.py:1107)
 
 ```python
 """Write the section on stock-out risk.
@@ -772,13 +863,55 @@ Module docstring: *Build the single-file webpage from the analysis results.*
         results (dict[str, Any]): All reported numbers.
         tables (dict[str, pandas.DataFrame]): Supporting tables.
         figures (pathlib.Path): Folder containing the figure PNGs.
+        repo_url (str): Public repository URL for code links.
 
     Returns:
         str: HTML for question 4.
     """
 ```
 
-#### `build_site` — [northwind_analysis/site.py:892](northwind_analysis/site.py:892)
+#### `_terms` — [northwind_analysis/site.py:1277](northwind_analysis/site.py:1277)
+
+```python
+"""Write the plain-English guide to the terms used on the page.
+
+    Args:
+        None.
+
+    Returns:
+        str: HTML for the glossary block.
+    """
+```
+
+#### `_how_to_check` — [northwind_analysis/site.py:1330](northwind_analysis/site.py:1330)
+
+```python
+"""Write the section that shows how to verify the numbers.
+
+    Args:
+        results (dict[str, Any]): All reported numbers.
+        repo_url (str): Public repository URL for code links.
+
+    Returns:
+        str: HTML for the check-our-work block.
+    """
+```
+
+#### `_repo_script` — [northwind_analysis/site.py:1386](northwind_analysis/site.py:1386)
+
+```python
+"""Return the script that points code links at the GitHub repo.
+
+    Args:
+        None.
+
+    Returns:
+        str: HTML ``script`` element. On a ``github.io`` address it
+        rewrites links that have no repository address yet.
+    """
+```
+
+#### `build_site` — [northwind_analysis/site.py:1411](northwind_analysis/site.py:1411)
 
 ```python
 """Write the complete webpage as one self-contained HTML file.
@@ -791,8 +924,9 @@ Module docstring: *Build the single-file webpage from the analysis results.*
         figures (pathlib.Path): Folder containing the figure PNGs.
         path (pathlib.Path): Output HTML path; parent folders are
             created.
-        repo_url (str): Public GitHub URL for the footer; leave
-            empty to omit the link.
+        repo_url (str): Public GitHub URL for the footer and code
+            links; when empty, code links are set from the page
+            address if it is a ``github.io`` address.
 
     Returns:
         None. Writes the HTML file to ``path``.
@@ -881,6 +1015,9 @@ Module docstring: *Cross-check headline numbers with SQL instead of pandas logic
 16. `robustness` / within-order comparison: only orders that contain both a full-price and a discounted line are used, and each order contributes the difference between the mean units of its discounted lines and of its full-price lines.
 17. `_customer_interval` / bootstrap: whole customers are resampled (2,000 draws, seed `SEED` = 20261122) because lines from one customer are not independent; 95% intervals are the 2.5th and 97.5th percentiles.
 18. `robustness` / `breakeven_lift_25_vs_5`: the unit lift a 25% discount needs over a 5% discount for revenue to break even, ignoring cost of goods: 0.95 / 0.75 - 1 = 26.7%. Margin is not in the data, so true break-even would be higher.
+19. `_code_link` / `repo_url`: when empty, the link points at `#how-to-check` and a page script rewrites it from the `github.io` address; the branch is assumed to be `main`.
+20. `copy_downloads`: copies only the six CSV tables and `results.json`, a fixed list in `DOWNLOAD_TABLES`, so the page links never point at a missing file.
+21. `_how_to_check` / spreadsheet formula: assumes the `Orders Details` tab has the columns OrderID, ProductID, UnitPrice, Quantity, Discount in A to E and data in rows 2 to 2156, as in the workbook in this repository.
 
 ## Also noticed
 

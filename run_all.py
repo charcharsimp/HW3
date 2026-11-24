@@ -171,6 +171,7 @@ def run(data_path, out_dir, site_path, repo_url=""):
         site_path,
         repo_url,
     )
+    site.copy_downloads(out_dir, site_path)
     return results
 
 

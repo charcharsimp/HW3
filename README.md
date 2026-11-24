@@ -59,13 +59,14 @@ work but have not been tested.
 | Q4 headline numbers | `inventory.inventory_summary` | `outputs/results.json` (`q4`) |
 | Delivery side check | `fulfillment.fulfillment_summary` | `outputs/results.json` (`side_check`), `outputs/tables/side_check_shippers.csv` |
 | Whole page | `site.build_site` | `docs/index.html` |
+| Download links on the page | `site.copy_downloads` | `docs/downloads/` (copies of the CSV tables and `results.json`) |
 
 The numbers quoted in the page text are filled in from
 `results.json` and the tables above, so they cannot drift from the
-analysis. A few fixed thresholds are written into the prose by hand
-(for example "$5,000 or more" and "at least 70%" in question 1); they
-match `DRIVER_MIN_GROWTH` in `markets.py` and the 0.7 cut-off in
-`site.py`.
+analysis. Thresholds such as the $5,000 growth floor, the 90-day lapse
+floor and the 5% base discount are read from the constants in the
+analysis modules. The one fixed threshold written into the prose is
+the 70% "one account" cut-off in question 1 (`site.py`).
 
 ## Definitions
 
@@ -94,6 +95,18 @@ match `DRIVER_MIN_GROWTH` in `markets.py` and the 0.7 cut-off in
   contain both. Intervals resample whole customers (2,000 draws, fixed
   seed), because lines from one customer are not independent.
 
+## How the webpage shows its reasoning
+
+Each question has a short answer, bulleted findings and a "How we got
+this" block. The block walks through the calculation with the real
+numbers and links to the CSV tables, `results.json` and the code. The
+page ends with a "Check our work" section, including a spreadsheet
+formula that reproduces total net revenue from the `Orders Details`
+sheet. The table and `results.json` links point at `docs/downloads/`,
+so upload that folder with `docs/index.html`. Code links go to the
+files on GitHub: they use `--repo-url` when you pass it and otherwise
+work out the repository from the `github.io` address of the page.
+
 ## Checks
 
 - `verify_with_sql.py` loads the workbook into an in-memory SQLite
@@ -119,7 +132,8 @@ noticed in the code.
 The page is one self-contained file, `docs/index.html` (charts are
 embedded). To host it on GitHub Pages: push the repo, then open
 Settings > Pages, choose "Deploy from a branch", branch `main`,
-folder `/docs`. Re-run `python run_all.py --repo-url <your repo URL>`
+folder `/docs`. Upload `docs/downloads/` with the page, or its links
+will be broken. Re-run `python run_all.py --repo-url <your repo URL>`
 to add the repository link to the page footer.
 
 ## Layout
@@ -140,4 +154,7 @@ tests/                     unit, pipeline and docstring tests
 data/                      Northwind_Database.xlsx
 outputs/                   figures, tables, results.json (generated)
 docs/index.html            the webpage (generated)
+docs/downloads/            tables and results.json linked from the page
+SKILL.md                   the python-docstrings skill used for docstrings
+assignment/                the assignment brief
 ```
