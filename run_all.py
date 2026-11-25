@@ -94,6 +94,7 @@ def run(data_path, out_dir, site_path, repo_url=""):
     Returns:
         dict[str, Any]: All numbers reported on the webpage.
     """
+    out_dir, site_path = Path(out_dir), Path(site_path)
     tables = data.load_tables(data_path)
     lines = data.build_order_lines(tables)
     prev_year, cur_year, last_month = data.comparison_window(
@@ -107,7 +108,10 @@ def run(data_path, out_dir, site_path, repo_url=""):
     q1 = markets.growth_summary(
         lines, growth, prev_year, cur_year, last_month
     )
+    monthly = markets.monthly_revenue(lines)
+    markets.plot_monthly_revenue(monthly, q1, figures / "q1_monthly.png")
     markets.plot_market_growth(growth, q1, figures / "q1_markets.png")
+    monthly.to_csv(tabs / "q1_monthly_revenue.csv", index=False)
     growth.to_csv(tabs / "q1_market_growth.csv", index=False)
 
     ranked = customers.revenue_by_customer(lines)
@@ -126,6 +130,7 @@ def run(data_path, out_dir, site_path, repo_url=""):
     q3 = discounts.discount_tests(lines)
     q3.update(discounts.robustness(lines))
     discounts.plot_discounts(tiers, figures / "q3_discounts.png")
+    discounts.plot_lift_estimates(q3, figures / "q3_lift_estimates.png")
     tiers.to_csv(tabs / "q3_discount_tiers.csv", index=False)
 
     cover = inventory.product_cover(
@@ -161,6 +166,7 @@ def run(data_path, out_dir, site_path, repo_url=""):
         results,
         {
             "q1": growth,
+            "q1_monthly": monthly,
             "q2_ranked": ranked,
             "q2_lapsed": lapsed,
             "q3": tiers,

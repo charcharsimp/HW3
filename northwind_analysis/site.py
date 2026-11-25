@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from northwind_analysis import customers, discounts, markets
+from northwind_analysis import customers, discounts, inventory, markets
 
 CSS = """
 :root {
@@ -243,6 +243,7 @@ DATA_SHEET_URL = (
     "1mD4Hn4NZdJlXMC4EJcSp27vg-_jbxUYJ95vQvMbSpVM/edit?usp=sharing"
 )
 DOWNLOAD_TABLES = (
+    "q1_monthly_revenue.csv",
     "q1_market_growth.csv",
     "q2_revenue_by_customer.csv",
     "q2_lapsed_accounts.csv",
@@ -519,6 +520,8 @@ def _question_one(results, tables, figures, repo_url=""):
     biggest_drop = falling.nsmallest(1, "Change").iloc[0]["Country"]
     usa = g[g["Country"] == "USA"].iloc[0]
     growth = q["revenue_cur"] - q["revenue_prev"]
+    monthly = tables["q1_monthly"]
+    peak = monthly.loc[monthly["Revenue"].idxmax()]
     rows = [
         [
             r.Country,
@@ -587,7 +590,9 @@ def _question_one(results, tables, figures, repo_url=""):
         f"Revenue of one order line = unit price × quantity × "
         f"(1 − discount). All {meta['order_lines']:,} lines add up to "
         f"{_usd(meta['net_revenue'])}.",
-        f"Keep only orders dated {win} of each year and group them by "
+        f"The monthly chart adds up net revenue by order month; the "
+        f"shaded months are the ones compared. Keep only orders "
+        f"dated {win} of each year and group them by "
         f"the customer's country. {win} {prev} adds up to "
         f"{_usd(q['revenue_prev'])} and {win} {cur} to "
         f"{_usd(q['revenue_cur'])}. {_usd(q['revenue_cur'])} ÷ "
@@ -617,24 +622,42 @@ def _question_one(results, tables, figures, repo_url=""):
         + _plain(short)
         + _row(
             "Why it matters",
-            "<p>Sales time is limited and revenue has more than "
-            "doubled. The manager needs to know which markets deserve "
-            "more attention, and which gains are fragile.</p>",
+            f"<p>Sales time is limited, and revenue in {win} {cur} was "
+            f"{q['growth_multiple']:.1f}× the same months of {prev}. "
+            f"The manager needs to know which markets deserve more "
+            f"attention, and which gains are fragile.</p>",
         )
         + _row(
             "Approach",
-            f"<p>Add up net revenue by the customer's country for "
+            f"<p>First, chart revenue by month to see the trend. Then "
+            f"add up net revenue by the customer's country for "
             f"{win} {cur} and for {win} {prev}. Only these months can "
-            f"be compared fairly: the data start in July 1996 and end "
-            f"on 6 May {cur}. Then, for each country, check how much "
-            f"of the gain came from its single largest customer.</p>",
+            f"be compared fairly: the data start in "
+            f"{_date(meta['first_order'])} and end on "
+            f"{_date(meta['last_order'])}. Finally, for each country, "
+            f"check how much of the gain came from its single largest "
+            f"customer.</p>",
+        )
+        + _figure(
+            figures,
+            "q1_monthly.png",
+            f"Line chart of net revenue by month from "
+            f"{_date(meta['first_order'])} to "
+            f"{_date(meta['last_order'])}. Monthly revenue peaks at "
+            f"{_usd(peak['Revenue'])} in {peak['Month']:%B %Y}. The "
+            f"shaded {win} bands total {_usd(q['revenue_prev'])} in "
+            f"{prev} and {_usd(q['revenue_cur'])} in {cur}.",
+            f"Net revenue by month. The shaded bands are the months "
+            f"used for the like-for-like comparison; hollow dots are "
+            f"months the data only partly cover.",
         )
         + _figure(
             figures,
             "q1_markets.png",
-            "Bar chart of revenue change by customer country, January "
-            "to April 1998 versus 1997. The USA, Germany and Brazil "
-            "grew most; Denmark, Canada, Mexico and Finland declined.",
+            f"Bar chart of revenue change by customer country, "
+            f"{win} {cur} versus {prev}. "
+            f"{_listing(g['Country'].head(3))} grew most; "
+            f"{_listing(falling['Country'])} declined.",
             f"Revenue change by customer country, {win} {cur} vs "
             f"{prev}. The right-hand column shows how much of a "
             f"growing market's gain came from its largest account.",
@@ -658,7 +681,11 @@ def _question_one(results, tables, figures, repo_url=""):
             "How we got this",
             _work(
                 steps,
-                ["q1_market_growth.csv", "results.json"],
+                [
+                    "q1_monthly_revenue.csv",
+                    "q1_market_growth.csv",
+                    "results.json",
+                ],
                 [
                     "northwind_analysis/markets.py",
                     "northwind_analysis/data.py",
@@ -688,14 +715,14 @@ def _question_two(results, tables, figures, repo_url=""):
     ranked = tables["q2_ranked"]
     lapsed = tables["q2_lapsed"]
     flagged = lapsed[lapsed["Lapsed"]]
-    top = flagged.iloc[0]
+    top = flagged[flagged["CompanyName"] == q["largest_lapsed"]].iloc[0]
     rank = int(
         ranked.loc[ranked["CompanyName"] == top["CompanyName"], "Rank"]
         .iloc[0]
     )
-    established = flagged.iloc[1:][
-        (flagged.iloc[1:]["Orders"] >= 5)
-        & (flagged.iloc[1:]["TrailingYearRevenue"] >= 5000)
+    others = flagged[flagged["CompanyName"] != top["CompanyName"]]
+    established = others[
+        (others["Orders"] >= 5) & (others["TrailingYearRevenue"] >= 5000)
     ]
     one_off = flagged[flagged["Orders"] <= 2]
     trailing_total = lapsed["TrailingYearRevenue"].sum()
@@ -843,14 +870,16 @@ def _question_two(results, tables, figures, repo_url=""):
         + _figure(
             figures,
             "q2_customers.png",
-            "Left: curve of cumulative revenue share by customer rank, "
-            "reaching 25 percent at the top 3 and 80 percent at the "
-            "top 34. Right: bars for the ten largest customers, with "
-            "Mere Paillarde highlighted as silent for longer than "
-            "usual.",
-            "Revenue concentration across 89 customers and the ten "
-            "largest accounts. Orange marks an account that has been "
-            "silent much longer than its usual pattern.",
+            f"Left: curve of cumulative revenue share by customer "
+            f"rank, reaching {_pct(q['top3_share'])} at the top 3 and "
+            f"80% at the top {q['customers_for_80pct']}. Right: bars "
+            f"for the ten largest customers, with "
+            f"{_esc(top['CompanyName'])} highlighted as silent for "
+            f"longer than usual.",
+            f"Revenue concentration across {q['customers']} customers "
+            f"and the ten largest accounts. Orange marks an account "
+            f"that has been silent much longer than its usual "
+            f"pattern.",
         )
         + _table(
             f"Accounts silent much longer than usual (as of {end})",
@@ -1067,14 +1096,30 @@ def _question_three(results, tables, figures, repo_url=""):
         + _figure(
             figures,
             "q3_discounts.png",
-            "Left: bars of mean units per order line at each discount "
-            "level, about 22 at no discount and 25 to 28 at every "
-            "discount level, with overlapping intervals. Right: bars "
-            "of discount dollars given, "
-            "rising from 7.8 thousand at 5 percent to 33 thousand at "
-            "25 percent.",
+            f"Left: bars of mean units per order line at each discount "
+            f"level, {q['mean_qty_none']:.1f} at no discount and "
+            f"{t['MeanQty'].iloc[1:].min():.1f} to "
+            f"{t['MeanQty'].iloc[1:].max():.1f} at every discount "
+            f"level, with overlapping intervals. Right: bars of "
+            f"discount dollars given, rising from "
+            f"{_usd(low['DiscountDollars'])} at 5% to "
+            f"{_usd(high['DiscountDollars'])} at 25%.",
             "Units per order line and revenue given away, by discount "
             "level.",
+        )
+        + _figure(
+            figures,
+            "q3_lift_estimates.png",
+            f"Interval chart of extra units per order line. All "
+            f"discounted lines versus full price: "
+            f"{q['qty_lift']:+.0%}. Same order: "
+            f"{q['within_order_lift']:+.0%}, interval including zero. "
+            f"25% versus 5% discount: {q['depth_diff_pct']:+.0%}, "
+            f"interval including zero and ending below the "
+            f"{q['breakeven_lift_25_vs_5']:.0%} break-even.",
+            "How much extra volume each comparison attributes to "
+            "discounts. Only the first, least controlled comparison "
+            "shows a clear gain.",
         )
         + _table(
             "Discount levels compared",
@@ -1125,6 +1170,8 @@ def _question_four(results, tables, figures, repo_url=""):
     ].nlargest(5, "WeeklyRevenue")
     empty = gone[gone["UnitsInStock"] == 0]
     biggest = none_ordered.iloc[0]
+    shown_risk = cover[cover["Status"].isin(inventory.LOW_STATUSES)]
+    shown_risk = shown_risk.nlargest(12, "WeeklyRevenue")
     last = pd.Timestamp(results["meta"]["last_order"])
     window = q["window_days"]
     rows = [
@@ -1174,8 +1221,9 @@ def _question_four(results, tables, figures, repo_url=""):
         f"<p>Place orders first for the best-selling products with "
         f"nothing on order: "
         f"{_listing(none_ordered['ProductName'])}. Then "
-        f"compare reorder levels with current sales rates, since "
-        f"order volume has roughly doubled year over year. Decide "
+        f"compare reorder levels with current sales rates, since the "
+        f"order count is up {results['q1']['orders_growth']:.0%} year "
+        f"over year. Decide "
         f"deliberately about the discontinued products customers "
         f"still buy: either reinstate the ones with steady sales "
         f"(for example "
@@ -1223,9 +1271,10 @@ def _question_four(results, tables, figures, repo_url=""):
         + _plain(short)
         + _row(
             "Why it matters",
-            "<p>A stock-out loses the sale and can lose the customer. "
-            "With orders doubling, stock levels set for slower months "
-            "may no longer fit.</p>",
+            f"<p>A stock-out loses the sale and can lose the customer. "
+            f"With the order count up {results['q1']['orders_growth']:.0%}"
+            f" year over year, stock levels set for slower months may "
+            f"no longer fit.</p>",
         )
         + _row(
             "Approach",
@@ -1239,10 +1288,12 @@ def _question_four(results, tables, figures, repo_url=""):
         + _figure(
             figures,
             "q4_inventory.png",
-            "Horizontal bars of weeks of stock cover for the twelve "
-            "best-selling products with under two weeks of stock. "
-            "Most have no units on order; three have an inbound order "
-            "shown as a lighter bar.",
+            f"Horizontal bars of weeks of stock cover for the "
+            f"{len(shown_risk)} best-selling products with under "
+            f"{q['alert_weeks']:.0f} weeks of stock. "
+            f"{int((shown_risk['UnitsOnOrder'] == 0).sum())} have no "
+            f"units on order; the others show an inbound order as a "
+            f"lighter bar.",
             "Weeks of cover for the best-selling low-stock products. "
             "Light hatched bars show cover if the units already on "
             "order arrive.",
@@ -1432,7 +1483,10 @@ def build_site(results, tables, figures, path, repo_url=""):
     start = _date(meta["first_order"])
     end = _date(meta["last_order"])
     shippers = tables["shippers"]
-    top = tables["q2_lapsed"].query("Lapsed").iloc[0]
+    lapsed_all = tables["q2_lapsed"]
+    top = lapsed_all[
+        lapsed_all["CompanyName"] == q2["largest_lapsed"]
+    ].iloc[0]
     glance = [
         f"<strong>Growth.</strong> {q1['window']} {q1['cur_year']} "
         f"revenue was {q1['growth_multiple']:.1f}× the same "
@@ -1489,12 +1543,21 @@ def build_site(results, tables, figures, path, repo_url=""):
         f"date ({side['late_orders']} late). Late rates run from "
         f"{_pct(late['LateRate'].min(), 1)} to "
         f"{_pct(late['LateRate'].max(), 1)} across the three "
-        f"shippers, a difference that could easily be chance "
-        f"(chi-square p = {side['shipper_chi2_p']:.2f}). Freight is "
+        f"shippers, "
+        + (
+            "a difference that could easily be chance "
+            if side["shipper_chi2_p"] > 0.05
+            else "a difference that is unlikely to be chance "
+        )
+        + f"(chi-square p = {side['shipper_chi2_p']:.2f}). Freight is "
         f"{_pct(side['freight_share_of_revenue'], 1)} of net "
         f"revenue, and {side['open_orders']} orders were still open. "
-        f"Fulfillment is not where to spend attention. "
-        f"Table: {_data_link('side_check_shippers.csv')}.",
+        + (
+            "Fulfillment is not where to spend attention. "
+            if side["shipper_chi2_p"] > 0.05
+            else "The shipper differences are worth a closer look. "
+        )
+        + f"Table: {_data_link('side_check_shippers.csv')}.",
         "<strong>Verification.</strong> "
         "<code>verify_with_sql.py</code> recomputes the headline "
         "numbers with SQL in a separate in-memory database and "

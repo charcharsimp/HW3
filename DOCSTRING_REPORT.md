@@ -56,7 +56,7 @@ Module docstring: *Run the full Northwind analysis and rebuild every output.*
     """
 ```
 
-#### `main` — [run_all.py:178](run_all.py:178)
+#### `main` — [run_all.py:184](run_all.py:184)
 
 ```python
 """Run the analysis from the command line.
@@ -140,16 +140,24 @@ Module docstring: *Question 2: how concentrated is revenue, and who is lapsing.*
 ```python
 """Summarise the lapsed-account flags.
 
+    The "largest lapsed account" is the flagged account with the
+    highest lifetime revenue among those with a usual gap between
+    orders (three or more orders); if none has one, the largest
+    flagged account is used.
+
     Args:
         lapsed (pandas.DataFrame): Output of ``lapsed_accounts``.
 
     Returns:
         dict[str, Any]: Number of lapsed accounts, their share of
         trailing-year revenue, and the largest lapsed account.
+
+    Raises:
+        ValueError: If no account is flagged as lapsed.
     """
 ```
 
-#### `plot_concentration` — [northwind_analysis/customers.py:180](northwind_analysis/customers.py:180)
+#### `plot_concentration` — [northwind_analysis/customers.py:191](northwind_analysis/customers.py:191)
 
 ```python
 """Draw the revenue concentration curve and top-10 customers.
@@ -323,7 +331,7 @@ Module docstring: *Question 3: what do discounts buy, and what do they cost.*
     """
 ```
 
-#### `robustness` — [northwind_analysis/discounts.py:170](northwind_analysis/discounts.py:170)
+#### `robustness` — [northwind_analysis/discounts.py:172](northwind_analysis/discounts.py:172)
 
 ```python
 """Check the discount findings against buyer and order effects.
@@ -348,7 +356,7 @@ Module docstring: *Question 3: what do discounts buy, and what do they cost.*
     """
 ```
 
-#### `robustness.lift` — [northwind_analysis/discounts.py:200](northwind_analysis/discounts.py:200)
+#### `robustness.lift` — [northwind_analysis/discounts.py:202](northwind_analysis/discounts.py:202)
 
 ```python
 """Compute the discounted-over-full-price lift of a sample.
@@ -360,11 +368,11 @@ Module docstring: *Question 3: what do discounts buy, and what do they cost.*
 
         Returns:
             float: Mean discounted units over mean full-price units,
-            minus one.
+            minus one, or NaN when the sample lacks either kind.
         """
 ```
 
-#### `robustness.depth` — [northwind_analysis/discounts.py:254](northwind_analysis/discounts.py:254)
+#### `robustness.depth` — [northwind_analysis/discounts.py:257](northwind_analysis/discounts.py:257)
 
 ```python
 """Compute the 25%-minus-5% difference in mean units.
@@ -380,7 +388,26 @@ Module docstring: *Question 3: what do discounts buy, and what do they cost.*
         """
 ```
 
-#### `plot_discounts` — [northwind_analysis/discounts.py:300](northwind_analysis/discounts.py:300)
+#### `plot_lift_estimates` — [northwind_analysis/discounts.py:304](northwind_analysis/discounts.py:304)
+
+```python
+"""Draw how much extra volume each comparison attributes to discounts.
+
+    Three estimates of the change in units per order line, each with
+    its 95% interval, are shown against zero and against the lift a
+    25% discount needs to match a 5% discount on revenue.
+
+    Args:
+        summary (dict[str, Any]): Combined output of
+            ``discount_tests`` and ``robustness``.
+        path (str | pathlib.Path): Output PNG path.
+
+    Returns:
+        pathlib.Path: The path that was written.
+    """
+```
+
+#### `plot_discounts` — [northwind_analysis/discounts.py:393](northwind_analysis/discounts.py:393)
 
 ```python
 """Draw units per line and discount dollars by discount level.
@@ -481,7 +508,7 @@ Module docstring: *Question 4: which products risk running out of stock.*
 
 Module docstring: *Question 1: which customer markets are growing or declining.*
 
-#### `market_growth` — [northwind_analysis/markets.py:18](northwind_analysis/markets.py:18)
+#### `market_growth` — [northwind_analysis/markets.py:19](northwind_analysis/markets.py:19)
 
 ```python
 """Compare country revenue across the same months of two years.
@@ -505,7 +532,24 @@ Module docstring: *Question 1: which customer markets are growing or declining.*
     """
 ```
 
-#### `growth_summary` — [northwind_analysis/markets.py:96](northwind_analysis/markets.py:96)
+#### `monthly_revenue` — [northwind_analysis/markets.py:97](northwind_analysis/markets.py:97)
+
+```python
+"""Total net revenue and orders for each calendar month.
+
+    Args:
+        lines (pandas.DataFrame): Order lines from
+            ``data.build_order_lines``.
+
+    Returns:
+        pandas.DataFrame: One row per month with ``Month`` (first day
+        of the month), ``Revenue``, ``Orders`` and ``Partial``, which
+        is True for the first and last month when the data do not
+        cover the whole month.
+    """
+```
+
+#### `growth_summary` — [northwind_analysis/markets.py:127](northwind_analysis/markets.py:127)
 
 ```python
 """Summarise overall growth and where it came from.
@@ -526,7 +570,22 @@ Module docstring: *Question 1: which customer markets are growing or declining.*
     """
 ```
 
-#### `plot_market_growth` — [northwind_analysis/markets.py:139](northwind_analysis/markets.py:139)
+#### `plot_monthly_revenue` — [northwind_analysis/markets.py:171](northwind_analysis/markets.py:171)
+
+```python
+"""Draw net revenue by month and mark the compared months.
+
+    Args:
+        monthly (pandas.DataFrame): Output of ``monthly_revenue``.
+        summary (dict[str, Any]): Output of ``growth_summary``.
+        path (str | pathlib.Path): Output PNG path.
+
+    Returns:
+        pathlib.Path: The path that was written.
+    """
+```
+
+#### `plot_market_growth` — [northwind_analysis/markets.py:246](northwind_analysis/markets.py:246)
 
 ```python
 """Draw revenue change by country as a ranked bar chart.
@@ -592,7 +651,7 @@ Module docstring: *Shared matplotlib style and formatting helpers.*
 
 Module docstring: *Build the single-file webpage from the analysis results.*
 
-#### `_usd` — [northwind_analysis/site.py:255](northwind_analysis/site.py:255)
+#### `_usd` — [northwind_analysis/site.py:256](northwind_analysis/site.py:256)
 
 ```python
 """Format dollars with thousands separators.
@@ -605,7 +664,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_usdk` — [northwind_analysis/site.py:267](northwind_analysis/site.py:267)
+#### `_usdk` — [northwind_analysis/site.py:268](northwind_analysis/site.py:268)
 
 ```python
 """Format dollars in thousands.
@@ -618,7 +677,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_pct` — [northwind_analysis/site.py:279](northwind_analysis/site.py:279)
+#### `_pct` — [northwind_analysis/site.py:280](northwind_analysis/site.py:280)
 
 ```python
 """Format a fraction as a percentage.
@@ -632,7 +691,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_date` — [northwind_analysis/site.py:292](northwind_analysis/site.py:292)
+#### `_date` — [northwind_analysis/site.py:293](northwind_analysis/site.py:293)
 
 ```python
 """Format a date without a leading zero on the day.
@@ -645,7 +704,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_listing` — [northwind_analysis/site.py:305](northwind_analysis/site.py:305)
+#### `_listing` — [northwind_analysis/site.py:306](northwind_analysis/site.py:306)
 
 ```python
 """Join names into a readable list.
@@ -658,7 +717,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_esc` — [northwind_analysis/site.py:320](northwind_analysis/site.py:320)
+#### `_esc` — [northwind_analysis/site.py:321](northwind_analysis/site.py:321)
 
 ```python
 """Escape text for safe use inside HTML.
@@ -671,7 +730,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_table` — [northwind_analysis/site.py:332](northwind_analysis/site.py:332)
+#### `_table` — [northwind_analysis/site.py:333](northwind_analysis/site.py:333)
 
 ```python
 """Render a table inside a horizontally scrollable box.
@@ -687,7 +746,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_figure` — [northwind_analysis/site.py:357](northwind_analysis/site.py:357)
+#### `_figure` — [northwind_analysis/site.py:358](northwind_analysis/site.py:358)
 
 ```python
 """Embed a figure PNG as a base64 image with a caption.
@@ -703,7 +762,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_row` — [northwind_analysis/site.py:377](northwind_analysis/site.py:377)
+#### `_row` — [northwind_analysis/site.py:378](northwind_analysis/site.py:378)
 
 ```python
 """Render one labelled block of a question section.
@@ -718,7 +777,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_code_link` — [northwind_analysis/site.py:394](northwind_analysis/site.py:394)
+#### `_code_link` — [northwind_analysis/site.py:395](northwind_analysis/site.py:395)
 
 ```python
 """Link to a file in the GitHub repository.
@@ -734,7 +793,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_data_link` — [northwind_analysis/site.py:417](northwind_analysis/site.py:417)
+#### `_data_link` — [northwind_analysis/site.py:418](northwind_analysis/site.py:418)
 
 ```python
 """Link to a downloadable results file next to the page.
@@ -747,7 +806,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_work` — [northwind_analysis/site.py:429](northwind_analysis/site.py:429)
+#### `_work` — [northwind_analysis/site.py:430](northwind_analysis/site.py:430)
 
 ```python
 """Render a collapsible step-by-step calculation.
@@ -763,7 +822,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_plain` — [northwind_analysis/site.py:452](northwind_analysis/site.py:452)
+#### `_plain` — [northwind_analysis/site.py:453](northwind_analysis/site.py:453)
 
 ```python
 """Render the one-sentence answer shown under a question.
@@ -776,7 +835,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_bullets` — [northwind_analysis/site.py:464](northwind_analysis/site.py:464)
+#### `_bullets` — [northwind_analysis/site.py:465](northwind_analysis/site.py:465)
 
 ```python
 """Render a compact bulleted list.
@@ -789,7 +848,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `copy_downloads` — [northwind_analysis/site.py:477](northwind_analysis/site.py:477)
+#### `copy_downloads` — [northwind_analysis/site.py:478](northwind_analysis/site.py:478)
 
 ```python
 """Copy the results files next to the page so it can link to them.
@@ -806,7 +865,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_question_one` — [northwind_analysis/site.py:497](northwind_analysis/site.py:497)
+#### `_question_one` — [northwind_analysis/site.py:498](northwind_analysis/site.py:498)
 
 ```python
 """Write the section on market growth.
@@ -822,7 +881,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_question_two` — [northwind_analysis/site.py:673](northwind_analysis/site.py:673)
+#### `_question_two` — [northwind_analysis/site.py:700](northwind_analysis/site.py:700)
 
 ```python
 """Write the section on customer concentration and lapses.
@@ -838,7 +897,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_question_three` — [northwind_analysis/site.py:888](northwind_analysis/site.py:888)
+#### `_question_three` — [northwind_analysis/site.py:917](northwind_analysis/site.py:917)
 
 ```python
 """Write the section on discounting.
@@ -854,7 +913,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_question_four` — [northwind_analysis/site.py:1107](northwind_analysis/site.py:1107)
+#### `_question_four` — [northwind_analysis/site.py:1152](northwind_analysis/site.py:1152)
 
 ```python
 """Write the section on stock-out risk.
@@ -870,7 +929,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_terms` — [northwind_analysis/site.py:1277](northwind_analysis/site.py:1277)
+#### `_terms` — [northwind_analysis/site.py:1328](northwind_analysis/site.py:1328)
 
 ```python
 """Write the plain-English guide to the terms used on the page.
@@ -883,7 +942,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_how_to_check` — [northwind_analysis/site.py:1330](northwind_analysis/site.py:1330)
+#### `_how_to_check` — [northwind_analysis/site.py:1381](northwind_analysis/site.py:1381)
 
 ```python
 """Write the section that shows how to verify the numbers.
@@ -897,7 +956,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `_repo_script` — [northwind_analysis/site.py:1386](northwind_analysis/site.py:1386)
+#### `_repo_script` — [northwind_analysis/site.py:1437](northwind_analysis/site.py:1437)
 
 ```python
 """Return the script that points code links at the GitHub repo.
@@ -911,7 +970,7 @@ Module docstring: *Build the single-file webpage from the analysis results.*
     """
 ```
 
-#### `build_site` — [northwind_analysis/site.py:1411](northwind_analysis/site.py:1411)
+#### `build_site` — [northwind_analysis/site.py:1462](northwind_analysis/site.py:1462)
 
 ```python
 """Write the complete webpage as one self-contained HTML file.
@@ -1018,6 +1077,9 @@ Module docstring: *Cross-check headline numbers with SQL instead of pandas logic
 19. `_code_link` / `repo_url`: when empty, the link points at `#how-to-check` and a page script rewrites it from the `github.io` address; the branch is assumed to be `main`.
 20. `copy_downloads`: copies only the six CSV tables and `results.json`, a fixed list in `DOWNLOAD_TABLES`, so the page links never point at a missing file.
 21. `_how_to_check` / spreadsheet formula: assumes the `Orders Details` tab has the columns OrderID, ProductID, UnitPrice, Quantity, Discount in A to E and data in rows 2 to 2156, as in the workbook in this repository.
+22. `monthly_revenue` / `Partial`: the first month is marked partial when the first order falls after day 1 and the last month when the last order is not on the month's final day; the data may in fact cover those days, with no orders placed.
+23. `lapse_summary` / largest lapsed account: chosen among flagged accounts with a usual gap (three or more orders), because a one-off buyer has no gap to compare; it falls back to the largest flagged account, and raises `ValueError` when nothing is flagged.
+24. `plot_lift_estimates` / same-order interval: the interval in units is divided by the mean full-price line in mixed orders to express it as a percentage, matching `within_order_lift`.
 
 ## Also noticed
 

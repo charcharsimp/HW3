@@ -163,6 +163,8 @@ def _customer_interval(groups, statistic):
         statistic([groups[i] for i in rng.integers(0, count, count)])
         for _ in range(BOOTSTRAP_DRAWS)
     ]
+    if np.isnan(draws).all():
+        return float("nan"), float("nan")
     low, high = np.nanpercentile(draws, [2.5, 97.5])
     return float(low), float(high)
 
@@ -207,16 +209,18 @@ def robustness(lines):
 
         Returns:
             float: Mean discounted units over mean full-price units,
-            minus one.
+            minus one, or NaN when the sample lacks either kind.
         """
         none = np.concatenate([item[0] for item in sample])
         some = np.concatenate([item[1] for item in sample])
+        if len(none) == 0 or len(some) == 0:
+            return np.nan
         return some.mean() / none.mean() - 1
 
     lift_low, lift_high = _customer_interval(
         list(by_customer.values()), lift
     )
-    diffs, full_in_mixed, owners = [], [], []
+    diffs, full_in_mixed, by_owner = [], [], {}
     plain = []
     for _, order in used.groupby("OrderID"):
         full = order.loc[order["Discount"] == 0, "Quantity"]
@@ -224,15 +228,14 @@ def robustness(lines):
         if len(full) and len(some):
             diffs.append(some.mean() - full.mean())
             full_in_mixed.extend(full)
-            owners.append(order["CustomerID"].iloc[0])
+            by_owner.setdefault(order["CustomerID"].iloc[0], []).append(
+                diffs[-1]
+            )
         elif len(full):
             plain.extend(full)
     diffs = np.array(diffs)
-    per_customer = pd.Series(diffs).groupby(np.array(owners)).apply(
-        lambda s: s.to_numpy()
-    )
     within_low, within_high = _customer_interval(
-        list(per_customer),
+        [np.array(by_owner[key]) for key in sorted(by_owner)],
         lambda sample: np.concatenate(sample).mean(),
     )
     higher, lower = int((diffs > 0).sum()), int((diffs < 0).sum())
@@ -287,6 +290,7 @@ def robustness(lines):
         "within_order_lower": lower,
         "within_order_sign_p": float(sign.pvalue),
         "depth_diff_units": top_mean - base_mean,
+        "depth_diff_pct": (top_mean - base_mean) / base_mean,
         "depth_ci_low": depth_low,
         "depth_ci_high": depth_high,
         "depth_ci_low_pct": depth_low / base_mean,
@@ -295,6 +299,95 @@ def robustness(lines):
         / (1 - TIERS[-1])
         - 1,
     }
+
+
+def plot_lift_estimates(summary, path):
+    """Draw how much extra volume each comparison attributes to discounts.
+
+    Three estimates of the change in units per order line, each with
+    its 95% interval, are shown against zero and against the lift a
+    25% discount needs to match a 5% discount on revenue.
+
+    Args:
+        summary (dict[str, Any]): Combined output of
+            ``discount_tests`` and ``robustness``.
+        path (str | pathlib.Path): Output PNG path.
+
+    Returns:
+        pathlib.Path: The path that was written.
+    """
+    plotting.apply_style()
+    colors = plotting.COLORS
+    full = summary["full_in_mixed_orders"]
+    rows = [
+        (
+            "All discounted lines vs full-price lines\n"
+            "(mixes buyers and order sizes)",
+            summary["qty_lift"],
+            summary["lift_ci_low"],
+            summary["lift_ci_high"],
+            colors["grey"],
+        ),
+        (
+            "Same order: discounted vs full-price line\n"
+            f"({summary['orders_with_both']} orders with both)",
+            summary["within_order_lift"],
+            summary["within_order_ci_low"] / full,
+            summary["within_order_ci_high"] / full,
+            colors["blue"],
+        ),
+        (
+            "25% discount vs 5% discount\n(does deeper sell more?)",
+            summary["depth_diff_pct"],
+            summary["depth_ci_low_pct"],
+            summary["depth_ci_high_pct"],
+            colors["blue"],
+        ),
+    ]
+    fig, ax = plt.subplots(figsize=(10.5, 4.6))
+    ypos = np.arange(len(rows))[::-1]
+    for y, (label, point, low, high, color) in zip(ypos, rows):
+        ax.plot([low, high], [y, y], color=color, linewidth=3,
+                solid_capstyle="round")
+        ax.scatter([point], [y], color=colors["dark"], zorder=3, s=55)
+        ax.text(
+            point,
+            y + 0.2,
+            f"{point:+.0%}  ({low:+.0%} to {high:+.0%})",
+            ha="center",
+            va="bottom",
+            fontsize=10,
+            bbox={"facecolor": "white", "edgecolor": "none", "pad": 1.5},
+            zorder=4,
+        )
+    ax.axvline(0, color=colors["dark"], linewidth=1, zorder=1)
+    breakeven = summary["breakeven_lift_25_vs_5"]
+    last = ypos[-1]
+    ax.plot([breakeven, breakeven], [last - 0.3, last + 0.3],
+            color=colors["orange"], linestyle="--", linewidth=2)
+    ax.text(
+        breakeven + 0.012,
+        last - 0.12,
+        f"Break-even for 25% vs 5%:\n{breakeven:+.0%} more units",
+        color=colors["orange"],
+        fontsize=10,
+        va="center",
+    )
+    ax.set_yticks(ypos, [row[0] for row in rows])
+    ax.set_ylim(-0.6, len(rows) - 0.3)
+    ax.set_xlim(
+        min(row[2] for row in rows) - 0.05,
+        max(max(row[3] for row in rows), breakeven) + 0.22,
+    )
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:+.0%}"))
+    ax.set_xlabel(
+        "Change in units per order line (dot = estimate, bar = 95% "
+        "interval)"
+    )
+    ax.set_title(
+        "How much extra volume do discounts buy?", loc="left", pad=12
+    )
+    return plotting.save_figure(fig, path)
 
 
 def plot_discounts(table, path):
@@ -321,7 +414,7 @@ def plot_discounts(table, path):
     for pos, row in zip(x, table.itertuples()):
         left.text(
             pos,
-            row.CIHigh + 0.8,
+            row.CIHigh + 0.015 * table["CIHigh"].max(),
             f"{row.MeanQty:.1f}",
             ha="center",
             fontsize=10,
@@ -339,7 +432,7 @@ def plot_discounts(table, path):
     for pos, row in zip(x[1:], table.iloc[1:].itertuples()):
         right.text(
             pos,
-            row.DiscountDollars + 600,
+            row.DiscountDollars + 0.015 * table["DiscountDollars"].max(),
             f"{plotting.money(row.DiscountDollars)}\n"
             f"({row.ShareOfDiscountDollars:.0%})",
             ha="center",

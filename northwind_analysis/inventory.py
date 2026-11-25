@@ -177,7 +177,7 @@ def plot_inventory(table, path, top_n=12):
     ax.text(
         COVER_ALERT_WEEKS + 0.05,
         len(risk) - 0.35,
-        "2-week alert line",
+        f"{COVER_ALERT_WEEKS:g}-week alert line",
         color=colors["orange"],
         fontsize=10,
         va="bottom",
@@ -206,9 +206,13 @@ def plot_inventory(table, path, top_n=12):
         fontsize=9,
         fontweight="bold",
     )
-    ax.set_xlabel("Weeks of cover at the last 120 days' sales rate")
+    ax.set_xlabel(
+        f"Weeks of cover at the last {DEMAND_WINDOW_DAYS} days' "
+        "sales rate"
+    )
     ax.set_title(
-        "Best-selling products with under two weeks of stock",
+        f"Best-selling products with under {COVER_ALERT_WEEKS:g} "
+        "weeks of stock",
         loc="left",
         pad=14,
     )

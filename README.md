@@ -44,14 +44,17 @@ work but have not been tested.
 
 | Webpage item | Function | Output file |
 | --- | --- | --- |
-| Q1 chart | `markets.plot_market_growth` | `outputs/figures/q1_markets.png` |
+| Q1 trend chart | `markets.plot_monthly_revenue` | `outputs/figures/q1_monthly.png` |
+| Q1 monthly table | `markets.monthly_revenue` | `outputs/tables/q1_monthly_revenue.csv` |
+| Q1 market chart | `markets.plot_market_growth` | `outputs/figures/q1_markets.png` |
 | Q1 table, growth by country | `markets.market_growth` | `outputs/tables/q1_market_growth.csv` |
 | Q1 headline numbers | `markets.growth_summary` | `outputs/results.json` (`q1`) |
 | Q2 chart | `customers.plot_concentration` | `outputs/figures/q2_customers.png` |
 | Q2 customer ranking | `customers.revenue_by_customer` | `outputs/tables/q2_revenue_by_customer.csv` |
 | Q2 lapsed-accounts table | `customers.lapsed_accounts` | `outputs/tables/q2_lapsed_accounts.csv` |
 | Q2 headline numbers | `customers.concentration_summary`, `customers.lapse_summary` | `outputs/results.json` (`q2`) |
-| Q3 chart | `discounts.plot_discounts` | `outputs/figures/q3_discounts.png` |
+| Q3 chart, units and dollars | `discounts.plot_discounts` | `outputs/figures/q3_discounts.png` |
+| Q3 chart, extra volume estimates | `discounts.plot_lift_estimates` | `outputs/figures/q3_lift_estimates.png` |
 | Q3 table, discount levels | `discounts.tier_table` | `outputs/tables/q3_discount_tiers.csv` |
 | Q3 tests and dollars | `discounts.discount_tests`, `discounts.robustness` | `outputs/results.json` (`q3`) |
 | Q4 chart | `inventory.plot_inventory` | `outputs/figures/q4_inventory.png` |
@@ -120,6 +123,11 @@ work out the repository from the `github.io` address of the page.
   or `Yields:` section, `Raises:` only where code raises, 72-character
   lines).
 
+## Review notes
+
+`REVIEW_NOTES.md` lists the bugs and issues found in a full code
+review, what was changed, and the limits that remain.
+
 ## Documentation
 
 All functions carry Google-style docstrings written with the
@@ -156,5 +164,7 @@ outputs/                   figures, tables, results.json (generated)
 docs/index.html            the webpage (generated)
 docs/downloads/            tables and results.json linked from the page
 SKILL.md                   the python-docstrings skill used for docstrings
+REVIEW_NOTES.md            bugs found, fixes made, remaining limits
+TRANSCRIPT.pdf             transcript of the AI conversation
 assignment/                the assignment brief
 ```

@@ -2,6 +2,7 @@
 
 import calendar
 
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -93,6 +94,36 @@ def market_growth(lines, prev_year, cur_year, last_month):
     return table.sort_values("Change", ascending=False).reset_index()
 
 
+def monthly_revenue(lines):
+    """Total net revenue and orders for each calendar month.
+
+    Args:
+        lines (pandas.DataFrame): Order lines from
+            ``data.build_order_lines``.
+
+    Returns:
+        pandas.DataFrame: One row per month with ``Month`` (first day
+        of the month), ``Revenue``, ``Orders`` and ``Partial``, which
+        is True for the first and last month when the data do not
+        cover the whole month.
+    """
+    stamp = lines["OrderDate"]
+    month = stamp.dt.to_period("M")
+    table = (
+        lines.groupby(month)
+        .agg(Revenue=("NetRevenue", "sum"), Orders=("OrderID", "nunique"))
+        .reset_index(names="Month")
+    )
+    first, last = stamp.min().normalize(), stamp.max().normalize()
+    table["Partial"] = False
+    if first.day > 1:
+        table.loc[table.index[0], "Partial"] = True
+    if last != last + pd.offsets.MonthEnd(0):
+        table.loc[table.index[-1], "Partial"] = True
+    table["Month"] = table["Month"].dt.to_timestamp()
+    return table
+
+
 def growth_summary(lines, table, prev_year, cur_year, last_month):
     """Summarise overall growth and where it came from.
 
@@ -115,6 +146,7 @@ def growth_summary(lines, table, prev_year, cur_year, last_month):
         "prev_year": int(prev_year),
         "cur_year": int(cur_year),
         "window": f"Jan–{calendar.month_abbr[last_month]}",
+        "last_month": int(last_month),
     }
     for tag, year in (("prev", prev_year), ("cur", cur_year)):
         part = window[window["Year"] == year]
@@ -134,6 +166,81 @@ def growth_summary(lines, table, prev_year, cur_year, last_month):
     out["markets_down"] = int((table["Change"] < 0).sum())
     out["markets_total"] = int(len(table))
     return out
+
+
+def plot_monthly_revenue(monthly, summary, path):
+    """Draw net revenue by month and mark the compared months.
+
+    Args:
+        monthly (pandas.DataFrame): Output of ``monthly_revenue``.
+        summary (dict[str, Any]): Output of ``growth_summary``.
+        path (str | pathlib.Path): Output PNG path.
+
+    Returns:
+        pathlib.Path: The path that was written.
+    """
+    plotting.apply_style()
+    colors = plotting.COLORS
+    fig, ax = plt.subplots(figsize=(10.5, 4.8))
+    ax.plot(
+        monthly["Month"],
+        monthly["Revenue"],
+        color=colors["blue"],
+        linewidth=2,
+        zorder=2,
+    )
+    full = monthly[~monthly["Partial"]]
+    part = monthly[monthly["Partial"]]
+    ax.scatter(
+        full["Month"], full["Revenue"], color=colors["blue"], zorder=3,
+        label="Full month",
+    )
+    ax.scatter(
+        part["Month"],
+        part["Revenue"],
+        facecolor="white",
+        edgecolor=colors["blue"],
+        linewidth=1.6,
+        zorder=3,
+        label="Partial month (data start or end inside it)",
+    )
+    top = monthly["Revenue"].max() * 1.22
+    for tag, year in (("prev", summary["prev_year"]),
+                      ("cur", summary["cur_year"])):
+        start = pd.Timestamp(year=year, month=1, day=1)
+        stop = pd.Timestamp(
+            year=year, month=summary["last_month"], day=28
+        ) + pd.offsets.MonthEnd(0)
+        ax.axvspan(start, stop, color=colors["light_blue"], alpha=0.45,
+                   zorder=1)
+        ax.text(
+            start + (stop - start) / 2,
+            top * 0.97,
+            f"{summary['window']} {year}\n"
+            f"{plotting.money(summary['revenue_' + tag])}",
+            ha="center",
+            va="top",
+            fontsize=10,
+            fontweight="bold",
+        )
+    ax.set_ylim(0, top)
+    ax.yaxis.set_major_formatter(FuncFormatter(plotting.money))
+    ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=(1, 4, 7, 10)))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
+    ax.set_xlabel("Order month")
+    ax.set_ylabel("Net revenue in the month (USD)")
+    ax.set_title(
+        "Net revenue by month; shaded bands are the months compared",
+        loc="left",
+        pad=12,
+    )
+    ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.18),
+        ncol=2,
+        frameon=False,
+    )
+    return plotting.save_figure(fig, path)
 
 
 def plot_market_growth(table, summary, path):

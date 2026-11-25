@@ -316,6 +316,57 @@ class TestInventory(unittest.TestCase):
         self.assertEqual(table.loc[0, "WeeklyUnits"], 0.0)
 
 
+class TestLapseSummary(unittest.TestCase):
+    @staticmethod
+    def frame(rows):
+        return pd.DataFrame(
+            rows,
+            columns=[
+                "CompanyName", "Country", "Lapsed", "TypicalGapDays",
+                "IdleDays", "TrailingYearRevenue", "LifetimeRevenue",
+            ],
+        )
+
+    def test_prefers_account_with_a_usual_gap(self):
+        lapsed = self.frame(
+            [
+                ("OneOff", "X", True, np.nan, 400, 0.0, 900.0),
+                ("Regular", "X", True, 20.0, 120, 50.0, 500.0),
+                ("Fine", "X", False, 10.0, 5, 100.0, 300.0),
+            ]
+        )
+        out = customers.lapse_summary(lapsed)
+        self.assertEqual(out["largest_lapsed"], "Regular")
+        self.assertEqual(out["lapsed_accounts"], 2)
+        self.assertAlmostEqual(out["lapsed_trailing_share"], 1 / 3)
+
+    def test_falls_back_when_no_account_has_a_gap(self):
+        lapsed = self.frame(
+            [("OneOff", "X", True, np.nan, 400, 5.0, 900.0)]
+        )
+        out = customers.lapse_summary(lapsed)
+        self.assertEqual(out["largest_lapsed"], "OneOff")
+
+    def test_raises_when_nothing_is_flagged(self):
+        lapsed = self.frame([("Fine", "X", False, 10.0, 5, 1.0, 2.0)])
+        with self.assertRaises(ValueError):
+            customers.lapse_summary(lapsed)
+
+
+class TestMonthlyRevenue(unittest.TestCase):
+    def test_flags_partial_first_and_last_months(self):
+        lines = make_lines(
+            [
+                (1, "A", "X", "1996-07-04", 1, 10.0, 1, 0.0),
+                (2, "A", "X", "1996-08-15", 1, 10.0, 2, 0.0),
+                (3, "A", "X", "1996-09-30", 1, 10.0, 3, 0.0),
+            ]
+        )
+        monthly = markets.monthly_revenue(lines)
+        self.assertEqual(monthly["Partial"].tolist(), [True, False, False])
+        self.assertEqual(monthly["Revenue"].tolist(), [10.0, 20.0, 30.0])
+
+
 class TestPipeline(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -353,15 +404,18 @@ class TestPipeline(unittest.TestCase):
 
     def test_outputs_exist(self):
         for name in (
+            "q1_monthly",
             "q1_markets",
             "q2_customers",
             "q3_discounts",
+            "q3_lift_estimates",
             "q4_inventory",
         ):
             png = self.out / "figures" / f"{name}.png"
             self.assertGreater(png.stat().st_size, 20_000, name)
         self.assertTrue((self.out / "results.json").exists())
         for csv in (
+            "q1_monthly_revenue",
             "q1_market_growth",
             "q2_revenue_by_customer",
             "q2_lapsed_accounts",
@@ -385,7 +439,7 @@ class TestPipeline(unittest.TestCase):
         text = re.sub(r"data:image/png;base64,[A-Za-z0-9+/=]+", "", text)
         text = re.sub(r"<[^>]+>", " ", text)
         self.assertIsNone(re.search(r"\bnan\b|\bNone\b|\binf\b", text))
-        self.assertEqual(html.count("<img "), 4)
+        self.assertEqual(html.count("<img "), 6)
         self.assertIn("https://github.com/example/repo", html)
 
     def test_calculation_links_point_at_real_files(self):
@@ -393,7 +447,7 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(html.count("<h3>How we got this</h3>"), 4)
         self.assertEqual(html.count("Show the calculation"), 4)
         downloads = set(re.findall(r"href='downloads/([^']+)'", html))
-        self.assertGreaterEqual(len(downloads), 7)
+        self.assertGreaterEqual(len(downloads), 8)
         for name in downloads:
             target = self.site.parent / "downloads" / name
             self.assertTrue(target.exists(), name)
@@ -416,6 +470,17 @@ class TestPipeline(unittest.TestCase):
         self.assertIn("data-repo-path='northwind_analysis/markets.py'", html)
         self.assertIn("a[data-repo-path]", html)
         self.assertNotIn("github.com/example", html)
+
+    def test_monthly_revenue_covers_every_line_once(self):
+        monthly = pd.read_csv(self.out / "tables" / "q1_monthly_revenue.csv")
+        self.assertAlmostEqual(
+            monthly["Revenue"].sum(), self.results["meta"]["net_revenue"], 2
+        )
+        self.assertEqual(monthly["Orders"].sum(), 830)
+        self.assertEqual(len(monthly), 23)
+        flags = monthly["Partial"].tolist()
+        self.assertTrue(flags[0] and flags[-1])
+        self.assertFalse(any(flags[1:-1]))
 
     def test_every_image_has_alt_text(self):
         html = self.site.read_text(encoding="utf-8")

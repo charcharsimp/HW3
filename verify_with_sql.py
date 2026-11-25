@@ -134,6 +134,17 @@ def main():
         check(f"{country} change", expected,
               scalar(con, country_sql, (country,)), failures)
 
+    monthly = pd.read_csv(ROOT / "outputs" / "tables" /
+                          "q1_monthly_revenue.csv")
+    for label in ("1997-01", "1998-04", "1998-05"):
+        row = monthly[monthly["Month"].str.startswith(label)].iloc[0]
+        check(f"Monthly revenue {label}", float(row["Revenue"]),
+              scalar(con, f"SELECT SUM({net}) FROM {join} "
+                     "WHERE substr(o.OrderDate, 1, 7) = ?", (label,)),
+              failures)
+    check("Sum of monthly revenue", float(monthly["Revenue"].sum()),
+          total, failures)
+
     top3 = con.execute(
         f"SELECT SUM(rev) FROM (SELECT SUM({net}) AS rev FROM {join} "
         "GROUP BY o.CustomerID ORDER BY rev DESC LIMIT 3)"

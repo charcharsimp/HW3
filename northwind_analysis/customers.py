@@ -150,15 +150,26 @@ def lapsed_accounts(lines):
 def lapse_summary(lapsed):
     """Summarise the lapsed-account flags.
 
+    The "largest lapsed account" is the flagged account with the
+    highest lifetime revenue among those with a usual gap between
+    orders (three or more orders); if none has one, the largest
+    flagged account is used.
+
     Args:
         lapsed (pandas.DataFrame): Output of ``lapsed_accounts``.
 
     Returns:
         dict[str, Any]: Number of lapsed accounts, their share of
         trailing-year revenue, and the largest lapsed account.
+
+    Raises:
+        ValueError: If no account is flagged as lapsed.
     """
     flagged = lapsed[lapsed["Lapsed"]]
-    top = flagged.iloc[0]
+    if flagged.empty:
+        raise ValueError("No lapsed accounts to summarise.")
+    usual = flagged[flagged["TypicalGapDays"].notna()]
+    top = (usual if len(usual) else flagged).iloc[0]
     return {
         "lapsed_accounts": int(len(flagged)),
         "lapsed_trailing_share": float(
